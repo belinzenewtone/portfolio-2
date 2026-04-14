@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 30 20% 97%;
+    --foreground: 220 14% 10%;
+    --primary: 82 77% 40%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 15% 93%;
+    --secondary-foreground: 220 14% 10%;
+    --muted: 30 10% 94%;
+    --muted-foreground: 220 5% 46%;
+    --border: 30 10% 90%;
+    --radius: 0.5rem;
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+}
+
+@layer utilities {
+  .bg-background { background-color: hsl(var(--background)); }
+  .bg-secondary-custom { background-color: hsl(var(--secondary)); }
+  .bg-muted-custom { background-color: hsl(var(--muted)); }
+  .text-muted-custom { color: hsl(var(--muted-foreground)); }
+  .border-custom { border-color: hsl(var(--border)); }
+  .text-primary-custom { color: hsl(var(--primary)); }
+  .bg-primary-custom { background-color: hsl(var(--primary)); }
+}
