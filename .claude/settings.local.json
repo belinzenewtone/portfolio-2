@@ -31,7 +31,17 @@
       "Bash(\"C:/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysql.exe\" -u root belinze_portfolio -e \"DELETE FROM profiles WHERE id = 2; SELECT id, name, profile_photo FROM profiles;\")",
       "Bash(ls \"public/storage\")",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:8000/storage/profile/belinze.jpg)",
-      "Bash(C:/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe artisan:*)"
+      "Bash(C:/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe artisan:*)",
+      "Bash(netstat -ano)",
+      "Bash(findstr \":8000\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:8000/)",
+      "Bash(curl -s http://127.0.0.1:8000/)",
+      "Bash(taskkill /PID 21000 /F)",
+      "Bash(cmd /c \"taskkill /F /PID 21000\")",
+      "Bash(cmd /c \"taskkill /F /PID 21000 2>&1\")",
+      "Bash(start /B C:/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe artisan serve --port=8000)",
+      "Bash(ping -n 3 127.0.0.1)",
+      "Bash(curl -s http://127.0.0.1:8000/admin/login)"
     ]
   }
 }

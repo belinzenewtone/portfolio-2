@@ -26,14 +26,14 @@ function destroy(id) {
         </Link>
       </div>
 
-      <div class="section-card !p-0 overflow-hidden">
+      <div class="section-card !p-0">
         <div v-if="posts.length === 0" class="py-16 text-center text-muted-foreground">
           <div class="text-4xl mb-3">✍️</div>
           <p class="text-sm font-medium">No blog posts yet</p>
           <Link :href="route('admin.blog.create')" class="text-xs mt-1 text-primary hover:underline">Write your first post</Link>
         </div>
 
-        <table v-else class="w-full text-sm">
+        <div class="overflow-x-auto" v-else><table class="w-full min-w-[520px] text-sm">
           <thead>
             <tr class="border-b border-border bg-muted/60">
               <th class="text-left px-4 py-3 text-xs font-semibold text-muted-foreground">Title</th>
@@ -67,7 +67,7 @@ function destroy(id) {
               </td>
             </tr>
           </tbody>
-        </table>
+        </table></div>
       </div>
     </div>
   </AdminLayout>
