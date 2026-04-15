@@ -5,22 +5,22 @@
 @tailwind utilities;
 
 @layer base {
-  /* ── Nexus Blue · Light mode ── */
+  /* ── Nexus Blue · Light mode (neutral white background, blue in elements) ── */
   :root {
-    --background: 214 60% 97%;
-    --foreground: 222 47% 11%;
+    --background: 0 0% 96%;
+    --foreground: 0 0% 9%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 0 0% 9%;
 
     --primary: 217 91% 54%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 214 50% 93%;
-    --secondary-foreground: 222 47% 20%;
+    --secondary: 0 0% 92%;
+    --secondary-foreground: 0 0% 20%;
 
-    --muted: 214 40% 94%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 0 0% 93%;
+    --muted-foreground: 0 0% 45%;
 
     --accent: 199 89% 48%;
     --accent-foreground: 0 0% 100%;
@@ -28,8 +28,8 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 32% 88%;
-    --input: 214 32% 88%;
+    --border: 0 0% 87%;
+    --input: 0 0% 87%;
     --ring: 217 91% 54%;
 
     --radius: 0.75rem;
@@ -38,31 +38,31 @@
     --font-body: 'Inter', sans-serif;
   }
 
-  /* ── Nexus Blue · Dark mode ── */
+  /* ── Nexus Blue · Dark mode (pure dark background, blue only in elements) ── */
   .dark {
-    --background: 222 47% 8%;
-    --foreground: 210 30% 94%;
+    --background: 0 0% 7%;
+    --foreground: 0 0% 93%;
 
-    --card: 222 40% 11%;
-    --card-foreground: 210 30% 94%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 93%;
 
     --primary: 217 91% 62%;
-    --primary-foreground: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 222 35% 16%;
-    --secondary-foreground: 210 25% 80%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 80%;
 
-    --muted: 222 35% 15%;
-    --muted-foreground: 215 16% 54%;
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 52%;
 
     --accent: 199 89% 55%;
-    --accent-foreground: 0 0% 0%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 222 30% 19%;
-    --input: 222 30% 19%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
     --ring: 217 91% 62%;
   }
 
