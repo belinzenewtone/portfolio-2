@@ -102,4 +102,33 @@
            text-sm text-muted-foreground hover:border-primary/40 hover:text-primary
            transition-all cursor-pointer;
   }
+
+  /* ── Admin form components ── */
+  .admin-label {
+    @apply block text-xs font-semibold mb-1.5 text-foreground;
+  }
+
+  .admin-input {
+    @apply w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground
+           placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20
+           focus:border-primary transition-colors;
+  }
+
+  .admin-error {
+    @apply text-xs text-red-500 mt-1;
+  }
+
+  .admin-hint {
+    @apply text-xs text-muted-foreground mt-0.5;
+  }
+
+  .admin-btn-primary {
+    @apply inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-xl
+           bg-primary text-primary-foreground hover:bg-primary/90 transition-all;
+  }
+
+  .admin-btn-outline {
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg
+           border border-border text-foreground hover:bg-muted transition-all;
+  }
 }
