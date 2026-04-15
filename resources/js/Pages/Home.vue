@@ -84,7 +84,7 @@ const catColor    = {
     <div class="mx-auto max-w-2xl">
 
       <!-- ─── PROFILE ───────────────────────────────────────────────────── -->
-      <header class="px-4 pt-8 pb-5">
+      <section class="section-card mx-4 mt-6 mb-3">
         <div class="flex items-start justify-between gap-4">
 
           <!-- Left: text -->
@@ -183,7 +183,7 @@ const catColor    = {
           class="mt-4 text-sm text-muted-foreground leading-relaxed border-l-2 border-primary/40 pl-3 py-1">
           {{ profile.bio }}
         </p>
-      </header>
+      </section>
 
       <!-- ─── STICKY NAV ────────────────────────────────────────────────── -->
       <nav class="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border">
@@ -210,11 +210,11 @@ const catColor    = {
       </nav>
 
       <!-- ─── TAB PANELS ────────────────────────────────────────────────── -->
-      <div class="px-4 py-5 pb-16 space-y-6">
+      <div class="px-4 py-3 pb-16 space-y-3">
 
         <!-- HOME: education -->
         <template v-if="activeTab === 'Home'">
-          <div>
+          <div class="section-card">
             <h2 class="text-lg font-bold font-display text-foreground mb-0.5">Education</h2>
             <p class="text-xs text-muted-foreground mb-4">Academic background</p>
 
@@ -245,7 +245,7 @@ const catColor    = {
 
         <!-- PROJECTS -->
         <template v-if="activeTab === 'Projects'">
-          <div>
+          <div class="section-card">
             <h2 class="text-lg font-bold font-display text-foreground mb-0.5">Software</h2>
             <p class="text-xs text-muted-foreground mb-4">Things I've built</p>
 
@@ -302,7 +302,7 @@ const catColor    = {
 
         <!-- WORK -->
         <template v-if="activeTab === 'Work'">
-          <div>
+          <div class="section-card">
             <h2 class="text-lg font-bold font-display text-foreground mb-0.5">Work Experience</h2>
             <p class="text-xs text-muted-foreground mb-4">Where I've worked</p>
 
@@ -352,7 +352,7 @@ const catColor    = {
 
         <!-- BLOG -->
         <template v-if="activeTab === 'Blog'">
-          <div>
+          <div class="section-card">
             <h2 class="text-lg font-bold font-display text-foreground mb-0.5">Blog</h2>
             <p class="text-xs text-muted-foreground mb-4">Writing &amp; thoughts</p>
 
@@ -388,7 +388,7 @@ const catColor    = {
 
         <!-- LISTS -->
         <template v-if="activeTab === 'Lists'">
-          <div>
+          <div class="section-card">
             <h2 class="text-lg font-bold font-display text-foreground mb-0.5">Lists</h2>
             <p class="text-xs text-muted-foreground mb-4">Curated collections</p>
 
@@ -441,7 +441,7 @@ const catColor    = {
 
         <!-- READING -->
         <template v-if="activeTab === 'Reading'">
-          <div>
+          <div class="section-card">
             <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
               <div>
                 <h2 class="text-lg font-bold font-display text-foreground mb-0.5">Reading</h2>
@@ -501,7 +501,7 @@ const catColor    = {
 
         <!-- TIMELINE -->
         <template v-if="activeTab === 'Timeline'">
-          <div>
+          <div class="section-card">
             <h2 class="text-lg font-bold font-display text-foreground mb-0.5">Timeline</h2>
             <p class="text-xs text-muted-foreground mb-4">Key moments in my journey</p>
 
