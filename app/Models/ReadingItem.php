@@ -13,7 +13,15 @@ class ReadingItem extends Model
 
     public function scopeOrdered($query)
     {
-        return $query->orderByRaw("FIELD(status, 'currently_reading', 'completed', 'want_to_read')")
-                     ->orderBy('sort_order');
+        return $query
+            ->orderByRaw("
+                CASE status
+                    WHEN 'currently_reading' THEN 1
+                    WHEN 'completed' THEN 2
+                    WHEN 'want_to_read' THEN 3
+                    ELSE 4
+                END
+            ")
+            ->orderBy('sort_order');
     }
 }
