@@ -196,12 +196,12 @@ const catColor    = {
 
       <!-- ─── NAV TABS ─────────────────────────────────────────────────── -->
       <nav class="section-card !p-1">
-        <div class="flex items-center gap-0.5 overflow-x-auto scrollbar-none">
+        <div class="flex items-stretch">
           <button
             v-for="tab in TABS"
             :key="tab"
             @click="setTab(tab)"
-            class="px-3 py-2 text-xs font-medium transition-all whitespace-nowrap rounded-lg flex-none"
+            class="flex-1 py-2 text-xs font-medium transition-all whitespace-nowrap rounded-lg text-center"
             :class="activeTab === tab && tab !== 'CV'
               ? 'bg-primary text-white shadow-sm'
               : tab === 'CV'

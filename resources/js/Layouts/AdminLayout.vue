@@ -31,7 +31,12 @@ const navGroups = [
 function logout() { router.post(route('admin.logout')); }
 
 function isActive(href) {
-  return page.url.startsWith(new URL(href).pathname);
+  const path = new URL(href).pathname.replace(/\/$/, '');
+  const current = page.url.split('?')[0].replace(/\/$/, '');
+  // Dashboard lives at exactly /admin — use exact match so it doesn't
+  // light up for every other /admin/* route
+  if (path === '/admin') return current === '/admin';
+  return current === path || current.startsWith(path + '/');
 }
 </script>
 
