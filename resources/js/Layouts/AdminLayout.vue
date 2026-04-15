@@ -1,10 +1,47 @@
 <script setup>
 import { Link, usePage, router } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 const page  = usePage();
 const flash = computed(() => page.props.flash || {});
 const sidebarOpen = ref(false);
+
+// ── Toast system ──────────────────────────────────────────────────────────
+const toast = ref(null);   // { type: 'success'|'error'|'info', message }
+let toastTimer = null;
+
+const toastConfig = {
+  success: {
+    classes: 'bg-[hsl(142,72%,18%)] border-green-700/60 text-green-200',
+    icon: 'M5 13l4 4L19 7',
+  },
+  error: {
+    classes: 'bg-[hsl(0,62%,18%)] border-red-700/60 text-red-200',
+    icon: 'M6 18L18 6M6 6l12 12',
+  },
+  info: {
+    classes: 'bg-[hsl(217,60%,18%)] border-primary/40 text-blue-200',
+    icon: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+  },
+};
+
+function showToast(type, message) {
+  clearTimeout(toastTimer);
+  toast.value = { type, message };
+  toastTimer = setTimeout(() => { toast.value = null; }, 4000);
+}
+
+function dismissToast() {
+  clearTimeout(toastTimer);
+  toast.value = null;
+}
+
+// Watch flash messages from server and convert to toasts
+watch(flash, (f) => {
+  if (f.success) showToast('success', f.success);
+  else if (f.error) showToast('error', f.error);
+  else if (f.info)  showToast('info',  f.info);
+}, { immediate: true });
 
 const navGroups = [
   {
@@ -160,34 +197,60 @@ function isActive(href) {
         </span>
       </header>
 
-      <!-- Flash messages -->
-      <transition enter-active-class="transition duration-200" enter-from-class="opacity-0 -translate-y-1" enter-to-class="opacity-100 translate-y-0">
-        <div v-if="flash.success"
-          class="mx-4 lg:mx-6 mt-4 px-4 py-3 rounded-xl text-sm font-medium
-                 text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/20
-                 border border-green-200 dark:border-green-800 flex items-center gap-2">
-          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-          </svg>
-          {{ flash.success }}
-        </div>
-      </transition>
-      <transition enter-active-class="transition duration-200" enter-from-class="opacity-0 -translate-y-1" enter-to-class="opacity-100 translate-y-0">
-        <div v-if="flash.error"
-          class="mx-4 lg:mx-6 mt-4 px-4 py-3 rounded-xl text-sm font-medium
-                 text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/20
-                 border border-red-200 dark:border-red-800 flex items-center gap-2">
-          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-          {{ flash.error }}
-        </div>
-      </transition>
-
       <!-- Page content -->
       <main class="flex-1 p-4 lg:p-6 overflow-auto">
         <slot />
       </main>
     </div>
   </div>
+
+  <!-- ── Toast portal — fixed top-center ── -->
+  <teleport to="body">
+    <transition
+      enter-active-class="transition duration-300 ease-out"
+      enter-from-class="opacity-0 -translate-y-3 scale-95"
+      enter-to-class="opacity-100 translate-y-0 scale-100"
+      leave-active-class="transition duration-200 ease-in"
+      leave-from-class="opacity-100 translate-y-0 scale-100"
+      leave-to-class="opacity-0 -translate-y-2 scale-95"
+    >
+      <div
+        v-if="toast"
+        :class="toastConfig[toast.type]?.classes"
+        class="fixed top-5 left-1/2 -translate-x-1/2 z-[9999]
+               flex items-center gap-3 px-5 py-3 rounded-2xl border
+               shadow-2xl shadow-black/40 backdrop-blur-sm
+               text-sm font-medium min-w-[260px] max-w-sm"
+        role="alert"
+      >
+        <!-- Icon -->
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" :d="toastConfig[toast.type]?.icon"/>
+        </svg>
+
+        <!-- Message -->
+        <span class="flex-1">{{ toast.message }}</span>
+
+        <!-- Dismiss -->
+        <button @click="dismissToast"
+          class="shrink-0 opacity-60 hover:opacity-100 transition-opacity ml-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+
+        <!-- Auto-dismiss progress bar -->
+        <div class="absolute bottom-0 left-0 h-0.5 rounded-full bg-current opacity-30"
+          style="animation: toast-shrink 4s linear forwards;">
+        </div>
+      </div>
+    </transition>
+  </teleport>
 </template>
+
+<style>
+@keyframes toast-shrink {
+  from { width: 100%; }
+  to   { width: 0%; }
+}
+</style>
