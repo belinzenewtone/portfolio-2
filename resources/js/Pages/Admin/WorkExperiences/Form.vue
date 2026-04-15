@@ -49,13 +49,18 @@ function getLogoUrl(logo) {
 
 <template>
   <AdminLayout>
-    <div class="max-w-xl space-y-5">
+    <template #back>
+      <Link :href="route('admin.work-experiences.index')"
+        class="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        Work Experience
+      </Link>
+    </template>
 
-      <div class="flex items-center gap-3">
-        <Link :href="route('admin.work-experiences.index')" class="text-sm text-muted-foreground hover:text-primary transition-colors">← Work Experience</Link>
-        <span class="text-muted-foreground">/</span>
-        <h2 class="text-xl font-bold font-display text-foreground">{{ isEditing ? 'Edit Experience' : 'New Experience' }}</h2>
-      </div>
+    <div class="max-w-xl space-y-5">
+      <h2 class="text-xl font-bold font-display text-foreground">{{ isEditing ? 'Edit Experience' : 'New Experience' }}</h2>
 
       <div class="section-card">
         <form @submit.prevent="submit" class="space-y-4">

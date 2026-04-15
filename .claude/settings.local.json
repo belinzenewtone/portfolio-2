@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php --version)",
+      "Bash(composer --version)",
+      "Bash(npm --version)",
+      "Bash(where php:*)",
+      "Bash(where composer:*)",
+      "Bash(where node:*)",
+      "Bash(where npm:*)",
+      "Read(//c/xampp/php/**)",
+      "Read(//c/laragon/bin/**)",
+      "Read(//c/php/**)",
+      "Bash(where mysql:*)",
+      "Read(//c//**)",
+      "Read(//c/laragon/**)",
+      "Bash(\"C:/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" \"C:/laragon/bin/composer/composer.phar\" install --no-interaction)",
+      "Bash(\"C:/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" artisan:*)",
+      "Bash(tasklist)",
+      "Bash(\"C:/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysql.exe\" -u root -e \"CREATE DATABASE IF NOT EXISTS belinze_portfolio CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; SHOW DATABASES;\")",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(start /B \"C:/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" artisan serve --host=127.0.0.1 --port=8000)",
+      "Bash(cmd /c start \"\" \"C:/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe\" artisan serve --host=127.0.0.1 --port=8000)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:8000)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:8000/admin/login)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "WebFetch(domain:davidamunga.com)",
+      "Bash(sort -t_ -k1)",
+      "Bash(\"C:/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysql.exe\" -u root belinze_portfolio -e \"UPDATE profiles SET profile_photo = 'profile/belinze.jpg' WHERE id = 1; SELECT id, name, profile_photo FROM profiles;\")",
+      "Bash(\"C:/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysql.exe\" -u root belinze_portfolio -e \"DELETE FROM profiles WHERE id = 2; SELECT id, name, profile_photo FROM profiles;\")",
+      "Bash(ls \"public/storage\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:8000/storage/profile/belinze.jpg)",
+      "Bash(C:/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe artisan:*)"
+    ]
+  }
+}
