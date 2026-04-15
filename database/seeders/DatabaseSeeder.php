@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'belinze.newtone@gmail.com',
             'github_url' => 'https://github.com/belinzenewtone',
             'linkedin_url' => 'https://www.linkedin.com/in/belinze-ojing-1b4738197/',
+            'profile_photo' => 'profile/belinze.jpg',
             'current_company' => 'Jamii Telecommunications Ltd',
         ]);
 
