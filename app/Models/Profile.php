@@ -23,6 +23,8 @@ class Profile extends Model
         'is_available',
         'availability_text',
         'show_availability',
+        'footer_email',
+        'footer_name',
     ];
 
     protected $casts = [

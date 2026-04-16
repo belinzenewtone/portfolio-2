@@ -737,7 +737,7 @@ const catColor    = {
               <!-- Header -->
               <div class="flex items-center justify-between px-5 py-4 border-b border-border">
                 <div>
-                  <h3 class="text-base font-bold font-display text-foreground">Say hello 👋</h3>
+                  <h3 class="text-base font-bold font-display text-foreground">Send a Message</h3>
                   <p class="text-xs text-muted-foreground mt-0.5">I'll get back to you as soon as possible.</p>
                 </div>
                 <button @click="closeContact"
@@ -799,10 +799,10 @@ const catColor    = {
       <!-- ─── FOOTER ─────────────────────────────────────────────────────── -->
       <footer class="px-4 py-8 border-t border-border text-center">
         <p class="text-xs text-muted-foreground">
-          <a :href="'mailto:' + (profile?.email || 'newtonebelinzeojing@gmail.com')"
-            class="hover:text-primary transition-colors">{{ profile?.email || 'newtonebelinzeojing@gmail.com' }}</a>
+          <a :href="'mailto:' + (profile?.footer_email || 'newtonebelinzeojing@gmail.com')"
+            class="hover:text-primary transition-colors">{{ profile?.footer_email || 'newtonebelinzeojing@gmail.com' }}</a>
           <span> · </span>
-          © {{ new Date().getFullYear() }} {{ profile?.name || 'Belinze Newtone' }}
+          © {{ new Date().getFullYear() }} {{ profile?.footer_name || 'Belinze Newtone' }}
         </p>
       </footer>
 

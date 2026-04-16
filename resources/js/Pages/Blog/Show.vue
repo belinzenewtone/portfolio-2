@@ -69,10 +69,10 @@ function toggleDark() {
       <!-- Footer -->
       <footer class="py-8 border-t border-border text-center">
         <p class="text-xs text-muted-foreground">
-          <a :href="'mailto:' + (profile?.email || 'newtonebelinzeojing@gmail.com')"
-            class="hover:text-primary transition-colors">{{ profile?.email || 'newtonebelinzeojing@gmail.com' }}</a>
+          <a :href="'mailto:' + (profile?.footer_email || 'newtonebelinzeojing@gmail.com')"
+            class="hover:text-primary transition-colors">{{ profile?.footer_email || 'newtonebelinzeojing@gmail.com' }}</a>
           <span> · </span>
-          © {{ new Date().getFullYear() }} {{ profile?.name || 'Belinze Newtone' }}
+          © {{ new Date().getFullYear() }} {{ profile?.footer_name || 'Belinze Newtone' }}
         </p>
       </footer>
     </div>

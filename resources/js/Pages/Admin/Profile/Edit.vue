@@ -21,6 +21,8 @@ const form = useForm({
   is_available:      props.profile?.is_available      ?? true,
   availability_text: props.profile?.availability_text ?? 'Open to opportunities',
   show_availability: props.profile?.show_availability ?? true,
+  footer_email:      props.profile?.footer_email      ?? 'newtonebelinzeojing@gmail.com',
+  footer_name:       props.profile?.footer_name       ?? 'Belinze Newtone',
 });
 
 const photoForm = useForm({ photo: null });
@@ -182,6 +184,24 @@ function getPhotoUrl(photo) {
             <div class="flex items-center gap-2">
               <input v-model="form.show_availability" type="checkbox" id="show_availability" class="w-4 h-4 rounded accent-primary"/>
               <label for="show_availability" class="text-sm text-foreground">Show badge on portfolio</label>
+            </div>
+          </div>
+
+          <!-- Footer settings -->
+          <div class="border border-border rounded-xl p-4 space-y-3 bg-muted/30">
+            <p class="text-sm font-semibold text-foreground">Footer</p>
+            <div>
+              <label class="admin-label">Footer Email *</label>
+              <input v-model="form.footer_email" type="email" required
+                placeholder="newtonebelinzeojing@gmail.com" class="admin-input"
+                :class="{'border-red-400': form.errors.footer_email}"/>
+              <p v-if="form.errors.footer_email" class="admin-error">{{ form.errors.footer_email }}</p>
+              <p class="admin-hint">Must be a valid email address (e.g. name@gmail.com). Shown as a clickable mailto link.</p>
+            </div>
+            <div>
+              <label class="admin-label">Copyright Name</label>
+              <input v-model="form.footer_name" type="text" placeholder="Belinze Newtone" class="admin-input"/>
+              <p class="admin-hint">Appears as "© {{ new Date().getFullYear() }} [name]". Year updates automatically.</p>
             </div>
           </div>
 

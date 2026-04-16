@@ -35,6 +35,8 @@ class ProfileController extends Controller
             'is_available'      => 'boolean',
             'availability_text' => 'nullable|string|max:100',
             'show_availability' => 'boolean',
+            'footer_email'      => 'nullable|email|max:255',
+            'footer_name'       => 'nullable|string|max:255',
         ]);
 
         $profile = Profile::first();

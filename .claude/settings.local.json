@@ -41,7 +41,12 @@
       "Bash(cmd /c \"taskkill /F /PID 21000 2>&1\")",
       "Bash(start /B C:/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe artisan serve --port=8000)",
       "Bash(ping -n 3 127.0.0.1)",
-      "Bash(curl -s http://127.0.0.1:8000/admin/login)"
+      "Bash(curl -s http://127.0.0.1:8000/admin/login)",
+      "Bash(net start:*)",
+      "Bash(sc query:*)",
+      "Bash(findstr /i mysql)",
+      "Bash(cmd /c \"net start mysql 2>&1 || echo trying_other_name && net start mysql57 2>&1 || net start mysql80 2>&1\")",
+      "Bash(C:/laragon/bin/nodejs/node-v22/npm.cmd run:*)"
     ]
   }
 }
