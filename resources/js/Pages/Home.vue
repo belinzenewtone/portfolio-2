@@ -593,10 +593,10 @@ const catColor    = {
       <!-- ─── FOOTER ─────────────────────────────────────────────────────── -->
       <footer class="px-4 py-8 border-t border-border text-center">
         <p class="text-xs text-muted-foreground">
-          <a v-if="profile?.email" :href="'mailto:' + profile.email"
-            class="hover:text-primary transition-colors">{{ profile.email }}</a>
-          <span v-if="profile?.email"> · </span>
-          © {{ new Date().getFullYear() }} {{ profile?.name || 'Belinze Ojing' }}
+          <a :href="'mailto:' + (profile?.email || 'newtonebelinzeojing@gmail.com')"
+            class="hover:text-primary transition-colors">{{ profile?.email || 'newtonebelinzeojing@gmail.com' }}</a>
+          <span> · </span>
+          © {{ new Date().getFullYear() }} {{ profile?.name || 'Belinze Newtone' }}
         </p>
       </footer>
 
