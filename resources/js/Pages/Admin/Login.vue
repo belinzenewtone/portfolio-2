@@ -1,10 +1,15 @@
 <script setup>
-import { useForm } from '@inertiajs/vue3';
+import { useForm, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
-const form = useForm({ password: '' });
+const form = useForm({ username: '', password: '' });
+const page = usePage();
+
+// Catch session-expiry / lockout errors passed via withErrors on redirect
+const flashError = computed(() => page.props.errors?.password || null);
 
 function submit() {
-  form.post(route('admin.login.submit'));
+  form.post(route('admin.login.submit'), { preserveScroll: true });
 }
 </script>
 
@@ -18,12 +23,30 @@ function submit() {
           B
         </div>
         <h1 class="text-2xl font-bold font-display text-foreground">Admin Login</h1>
-        <p class="text-sm mt-1 text-muted-foreground">Enter your password to access the admin panel.</p>
+        <p class="text-sm mt-1 text-muted-foreground">Sign in with your admin credentials.</p>
       </div>
 
       <!-- Card -->
       <div class="section-card">
         <form @submit.prevent="submit" class="space-y-4">
+
+          <!-- Username -->
+          <div>
+            <label for="username" class="block text-xs font-semibold mb-1.5 text-foreground">Username</label>
+            <input
+              id="username"
+              v-model="form.username"
+              type="text"
+              autocomplete="username"
+              required
+              placeholder="Enter admin username"
+              class="admin-input"
+              :class="form.errors.username ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : ''"
+            />
+            <p v-if="form.errors.username" class="mt-1.5 text-xs text-red-500">{{ form.errors.username }}</p>
+          </div>
+
+          <!-- Password -->
           <div>
             <label for="password" class="block text-xs font-semibold mb-1.5 text-foreground">Password</label>
             <input

@@ -25,7 +25,7 @@ Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 // Admin
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login',  [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.submit')->middleware('throttle:10,15');
     Route::post('/logout',[AuthController::class, 'logout'])->name('logout');
 
     Route::middleware('admin')->group(function () {

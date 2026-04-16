@@ -4,11 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class AuthController extends Controller
 {
-    public function showLogin()
+    private const MAX_ATTEMPTS    = 5;
+    private const LOCKOUT_MINUTES = 15;
+
+    public function showLogin(Request $request)
     {
         if (session('is_admin')) {
             return redirect()->route('admin.dashboard');
@@ -18,19 +22,94 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $request->validate(['password' => 'required']);
+        $request->validate([
+            'username' => 'required|string',
+            'password' => 'required|string',
+        ]);
 
-        if ($request->password === config('app.admin_password', env('ADMIN_PASSWORD', 'admin123'))) {
-            session(['is_admin' => true]);
+        // ── 1. Session-based lockout check ────────────────────────────────────
+        $lockoutUntil = session('admin_lockout_until');
+
+        if ($lockoutUntil) {
+            if (now()->timestamp < $lockoutUntil) {
+                $minutesLeft = (int) ceil(($lockoutUntil - now()->timestamp) / 60);
+                return back()->withErrors([
+                    'password' => "Too many failed attempts. Try again in {$minutesLeft} minute(s).",
+                ]);
+            }
+            // Lockout expired — clear it
+            session()->forget(['admin_lockout_until', 'admin_login_attempts']);
+        }
+
+        // ── 2. Validate credentials (no hardcoded fallback) ───────────────────
+        $adminUsername = config('app.admin_username');
+        $adminPassword = config('app.admin_password');
+
+        if (
+            $adminUsername &&
+            $adminPassword &&
+            hash_equals($adminUsername, $request->username) &&
+            hash_equals($adminPassword, $request->password)
+        ) {
+            // ── Success ───────────────────────────────────────────────────────
+            session()->forget(['admin_login_attempts', 'admin_lockout_until']);
+
+            // 3. Session regeneration — prevent session fixation
+            $request->session()->regenerate();
+
+            session([
+                'is_admin'            => true,
+                'admin_last_activity' => now()->timestamp,
+            ]);
+
+            Log::channel('single')->info('Admin login successful', [
+                'ip'       => $request->ip(),
+                'username' => $request->username,
+                'time'     => now()->toDateTimeString(),
+            ]);
+
             return redirect()->route('admin.dashboard');
         }
 
-        return back()->withErrors(['password' => 'Incorrect password.']);
+        // ── 3. Failed — increment counter & log ───────────────────────────────
+        $attempts = session('admin_login_attempts', 0) + 1;
+        session(['admin_login_attempts' => $attempts]);
+
+        // 6. Log failed attempt with IP + timestamp
+        Log::channel('single')->warning('Admin login failed', [
+            'ip'       => $request->ip(),
+            'username' => $request->username,
+            'attempt'  => $attempts,
+            'time'     => now()->toDateTimeString(),
+        ]);
+
+        // 4. Lock out after MAX_ATTEMPTS failures
+        if ($attempts >= self::MAX_ATTEMPTS) {
+            $lockoutUntil = now()->addMinutes(self::LOCKOUT_MINUTES)->timestamp;
+            session(['admin_lockout_until' => $lockoutUntil]);
+            session()->forget('admin_login_attempts');
+
+            Log::channel('single')->warning('Admin account locked out', [
+                'ip'            => $request->ip(),
+                'username'      => $request->username,
+                'lockout_until' => now()->addMinutes(self::LOCKOUT_MINUTES)->toDateTimeString(),
+            ]);
+
+            return back()->withErrors([
+                'password' => 'Too many failed attempts. You are locked out for ' . self::LOCKOUT_MINUTES . ' minutes.',
+            ]);
+        }
+
+        $remaining = self::MAX_ATTEMPTS - $attempts;
+        return back()->withErrors([
+            'password' => "Incorrect username or password. {$remaining} attempt(s) remaining before lockout.",
+        ]);
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
-        session()->forget('is_admin');
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
         return redirect()->route('home');
     }
 }

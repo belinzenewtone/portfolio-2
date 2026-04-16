@@ -5,7 +5,9 @@ use Illuminate\Support\ServiceProvider;
 
 return [
 
-    'name' => env('APP_NAME', 'Belinze Portfolio'),
+    'name'           => env('APP_NAME', 'Belinze Portfolio'),
+    'admin_username' => env('ADMIN_USERNAME'),
+    'admin_password' => env('ADMIN_PASSWORD'),
     'env' => env('APP_ENV', 'production'),
     'debug' => (bool) env('APP_DEBUG', false),
     'url' => env('APP_URL', 'http://localhost'),
