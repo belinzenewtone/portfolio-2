@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ListItem extends Model
 {
-    protected $fillable = ['list_id', 'text', 'url', 'note', 'sort_order'];
+    protected $fillable = ['list_id', 'text', 'url', 'note', 'sort_order', 'is_completed'];
+
+    protected $casts = ['is_completed' => 'boolean'];
 
     public function list(): BelongsTo
     {

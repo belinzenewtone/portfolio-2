@@ -399,16 +399,28 @@ const catColor    = {
 
             <div v-else class="divide-y divide-border">
               <div v-for="(list, i) in lists" :key="list.id">
+                <!-- List header row -->
                 <button @click="toggleList(i)" class="flex items-center justify-between w-full gap-3 py-4 text-left group">
                   <div class="flex items-center gap-3 flex-1 min-w-0">
                     <span class="text-2xl leading-none shrink-0">{{ list.emoji || '📋' }}</span>
-                    <div class="min-w-0">
+                    <div class="min-w-0 flex-1">
                       <div class="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{{ list.title }}</div>
                       <p v-if="list.description" class="text-xs text-muted-foreground mt-0.5 truncate">{{ list.description }}</p>
+                      <!-- Progress bar (always visible) -->
+                      <div v-if="list.items?.length" class="mt-2 space-y-1">
+                        <div class="flex items-center justify-between text-xs text-muted-foreground">
+                          <span>{{ list.items.filter(x => x.is_completed).length }} done · {{ list.items.filter(x => !x.is_completed).length }} remaining</span>
+                          <span class="font-medium">{{ Math.round(list.items.filter(x => x.is_completed).length / list.items.length * 100) }}%</span>
+                        </div>
+                        <div class="h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div class="h-full bg-primary rounded-full transition-all duration-500"
+                            :style="{ width: Math.round(list.items.filter(x => x.is_completed).length / list.items.length * 100) + '%' }">
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div class="flex items-center gap-2 shrink-0">
-                    <span class="text-xs text-muted-foreground">{{ list.items?.length ?? 0 }}</span>
+                  <div class="flex items-center gap-2 shrink-0 self-start mt-1">
                     <svg class="w-4 h-4 text-muted-foreground transition-transform duration-200"
                       :class="openList === i ? 'rotate-180 text-primary' : ''"
                       fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -417,22 +429,59 @@ const catColor    = {
                   </div>
                 </button>
 
-                <div v-if="openList === i" class="pb-4 -mt-1 space-y-2 pl-11">
-                  <div v-for="item in list.items" :key="item.id" class="flex items-start gap-2">
-                    <span class="text-primary mt-0.5 text-xs shrink-0 font-bold">→</span>
-                    <div class="min-w-0">
-                      <a v-if="item.url" :href="item.url" target="_blank" rel="noopener"
-                        class="text-sm text-foreground hover:text-primary transition-colors font-medium">
-                        {{ item.text }}
-                        <svg class="inline w-3 h-3 ml-0.5 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                        </svg>
-                      </a>
-                      <span v-else class="text-sm text-foreground">{{ item.text }}</span>
-                      <span v-if="item.note" class="ml-2 text-xs text-muted-foreground">{{ item.note }}</span>
+                <!-- Expanded items -->
+                <div v-if="openList === i" class="pb-5 -mt-1 pl-11 space-y-4">
+
+                  <!-- Pending items -->
+                  <div class="space-y-2">
+                    <div v-for="item in list.items.filter(x => !x.is_completed)" :key="item.id"
+                      class="flex items-start gap-2.5">
+                      <!-- Hollow circle indicator -->
+                      <span class="w-4 h-4 rounded-full border-2 border-border shrink-0 mt-0.5 flex items-center justify-center"></span>
+                      <div class="min-w-0">
+                        <a v-if="item.url" :href="item.url" target="_blank" rel="noopener"
+                          class="text-sm text-foreground hover:text-primary transition-colors">
+                          {{ item.text }}
+                          <svg class="inline w-3 h-3 ml-0.5 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                          </svg>
+                        </a>
+                        <span v-else class="text-sm text-foreground">{{ item.text }}</span>
+                        <span v-if="item.note" class="block text-xs text-muted-foreground mt-0.5">{{ item.note }}</span>
+                      </div>
                     </div>
                   </div>
+
+                  <!-- Completed section -->
+                  <div v-if="list.items.some(x => x.is_completed)">
+                    <p class="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1.5">
+                      <svg class="w-3.5 h-3.5 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5l-4.5-4.5 1.41-1.41L10 13.67l7.09-7.09L18.5 8l-8.5 8.5z"/>
+                      </svg>
+                      {{ list.items.filter(x => x.is_completed).length }} completed
+                    </p>
+                    <div class="space-y-2">
+                      <div v-for="item in list.items.filter(x => x.is_completed)" :key="item.id"
+                        class="flex items-start gap-2.5">
+                        <!-- Green filled checkmark circle -->
+                        <span class="w-4 h-4 rounded-full bg-green-500 shrink-0 mt-0.5 flex items-center justify-center">
+                          <svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                          </svg>
+                        </span>
+                        <div class="min-w-0">
+                          <a v-if="item.url" :href="item.url" target="_blank" rel="noopener"
+                            class="text-sm text-muted-foreground line-through hover:text-primary transition-colors">
+                            {{ item.text }}
+                          </a>
+                          <span v-else class="text-sm text-muted-foreground line-through">{{ item.text }}</span>
+                          <span v-if="item.note" class="block text-xs text-muted-foreground/60 mt-0.5">{{ item.note }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               </div>
             </div>
@@ -542,12 +591,12 @@ const catColor    = {
       </div>
 
       <!-- ─── FOOTER ─────────────────────────────────────────────────────── -->
-      <footer class="px-4 py-6 border-t border-border text-center">
+      <footer class="px-4 py-8 border-t border-border text-center">
         <p class="text-xs text-muted-foreground">
-          Built by
-          <a v-if="profile?.github_url" :href="profile.github_url" target="_blank" rel="noopener"
-            class="text-primary hover:underline font-medium">{{ profile?.name || 'Belinze' }}</a>
-          <span v-else class="text-foreground font-medium">{{ profile?.name || 'Belinze' }}</span>
+          <a v-if="profile?.email" :href="'mailto:' + profile.email"
+            class="hover:text-primary transition-colors">{{ profile.email }}</a>
+          <span v-if="profile?.email"> · </span>
+          © {{ new Date().getFullYear() }} {{ profile?.name || 'Belinze Ojing' }}
         </p>
       </footer>
 

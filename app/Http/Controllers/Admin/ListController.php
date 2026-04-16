@@ -31,9 +31,10 @@ class ListController extends Controller
             'is_published'=> 'boolean',
             'sort_order'  => 'integer|min:0',
             'items'       => 'nullable|array',
-            'items.*.text'=> 'required|string|max:500',
-            'items.*.url' => 'nullable|url|max:500',
-            'items.*.note'=> 'nullable|string|max:255',
+            'items.*.text'        => 'required|string|max:500',
+            'items.*.url'         => 'nullable|url|max:500',
+            'items.*.note'        => 'nullable|string|max:255',
+            'items.*.is_completed'=> 'boolean',
         ]);
 
         $list = BlogList::create([
@@ -46,10 +47,11 @@ class ListController extends Controller
 
         foreach ($data['items'] ?? [] as $i => $item) {
             $list->items()->create([
-                'text'       => $item['text'],
-                'url'        => $item['url'] ?? null,
-                'note'       => $item['note'] ?? null,
-                'sort_order' => $i,
+                'text'         => $item['text'],
+                'url'          => $item['url'] ?? null,
+                'note'         => $item['note'] ?? null,
+                'sort_order'   => $i,
+                'is_completed' => $item['is_completed'] ?? false,
             ]);
         }
 
@@ -72,10 +74,11 @@ class ListController extends Controller
             'is_published'=> 'boolean',
             'sort_order'  => 'integer|min:0',
             'items'       => 'nullable|array',
-            'items.*.id'  => 'nullable|integer',
-            'items.*.text'=> 'required|string|max:500',
-            'items.*.url' => 'nullable|url|max:500',
-            'items.*.note'=> 'nullable|string|max:255',
+            'items.*.id'          => 'nullable|integer',
+            'items.*.text'        => 'required|string|max:500',
+            'items.*.url'         => 'nullable|url|max:500',
+            'items.*.note'        => 'nullable|string|max:255',
+            'items.*.is_completed'=> 'boolean',
         ]);
 
         $list->update([
@@ -90,10 +93,11 @@ class ListController extends Controller
         $list->items()->delete();
         foreach ($data['items'] ?? [] as $i => $item) {
             $list->items()->create([
-                'text'       => $item['text'],
-                'url'        => $item['url'] ?? null,
-                'note'       => $item['note'] ?? null,
-                'sort_order' => $i,
+                'text'         => $item['text'],
+                'url'          => $item['url'] ?? null,
+                'note'         => $item['note'] ?? null,
+                'sort_order'   => $i,
+                'is_completed' => $item['is_completed'] ?? false,
             ]);
         }
 

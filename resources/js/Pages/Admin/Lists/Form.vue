@@ -12,11 +12,11 @@ const form = useForm({
   emoji:        props.list?.emoji        ?? '📋',
   is_published: props.list?.is_published ?? true,
   sort_order:   props.list?.sort_order   ?? 0,
-  items:        props.list?.items?.map(i => ({ text: i.text, url: i.url || '', note: i.note || '' })) ?? [],
+  items:        props.list?.items?.map(i => ({ text: i.text, url: i.url || '', note: i.note || '', is_completed: i.is_completed ?? false })) ?? [],
 });
 
 function addItem() {
-  form.items.push({ text: '', url: '', note: '' });
+  form.items.push({ text: '', url: '', note: '', is_completed: false });
 }
 
 function removeItem(index) {
@@ -99,22 +99,29 @@ function submit() {
 
             <div class="space-y-2">
               <div v-for="(item, i) in form.items" :key="i"
-                class="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2 p-3 bg-muted/40 rounded-lg border border-border">
-                <div>
-                  <input v-model="item.text" type="text" placeholder="Item text *" required
-                    class="admin-input text-xs"/>
+                class="p-3 bg-muted/40 rounded-lg border border-border space-y-2"
+                :class="item.is_completed ? 'opacity-70' : ''">
+                <div class="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2">
+                  <div>
+                    <input v-model="item.text" type="text" placeholder="Item text *" required
+                      class="admin-input text-xs" :class="item.is_completed ? 'line-through text-muted-foreground' : ''"/>
+                  </div>
+                  <div>
+                    <input v-model="item.url" type="url" placeholder="URL (optional)" class="admin-input text-xs"/>
+                  </div>
+                  <button type="button" @click="removeItem(i)"
+                    class="self-center p-1.5 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                  </button>
                 </div>
-                <div>
-                  <input v-model="item.url" type="url" placeholder="URL (optional)" class="admin-input text-xs"/>
-                </div>
-                <button type="button" @click="removeItem(i)"
-                  class="self-center p-1.5 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                  </svg>
-                </button>
-                <div class="sm:col-span-2">
+                <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 items-center">
                   <input v-model="item.note" type="text" placeholder="Note (optional)" class="admin-input text-xs"/>
+                  <label class="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer whitespace-nowrap">
+                    <input v-model="item.is_completed" type="checkbox" class="w-3.5 h-3.5 rounded accent-green-500"/>
+                    Completed
+                  </label>
                 </div>
               </div>
             </div>
