@@ -15,11 +15,13 @@ class Project extends Model
         'bg_color',
         'sort_order',
         'is_visible',
+        'is_featured',
     ];
 
     protected $casts = [
-        'date' => 'date',
-        'is_visible' => 'boolean',
+        'date'        => 'date',
+        'is_visible'  => 'boolean',
+        'is_featured' => 'boolean',
     ];
 
     public function scopeOrdered($query)

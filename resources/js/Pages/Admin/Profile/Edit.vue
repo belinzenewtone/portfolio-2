@@ -6,18 +6,21 @@ import { ref } from 'vue';
 const props = defineProps({ profile: Object });
 
 const form = useForm({
-  name:             props.profile?.name             ?? '',
-  title:            props.profile?.title            ?? '',
-  subtitle:         props.profile?.subtitle         ?? '',
-  location:         props.profile?.location         ?? '',
-  bio:              props.profile?.bio              ?? '',
-  email:            props.profile?.email            ?? '',
-  github_url:       props.profile?.github_url       ?? '',
-  linkedin_url:     props.profile?.linkedin_url     ?? '',
-  twitter_url:      props.profile?.twitter_url      ?? '',
-  current_company:  props.profile?.current_company  ?? '',
-  years_experience: props.profile?.years_experience ?? '',
-  cv_url:           props.profile?.cv_url           ?? '',
+  name:              props.profile?.name              ?? '',
+  title:             props.profile?.title             ?? '',
+  subtitle:          props.profile?.subtitle          ?? '',
+  location:          props.profile?.location          ?? '',
+  bio:               props.profile?.bio               ?? '',
+  email:             props.profile?.email             ?? '',
+  github_url:        props.profile?.github_url        ?? '',
+  linkedin_url:      props.profile?.linkedin_url      ?? '',
+  twitter_url:       props.profile?.twitter_url       ?? '',
+  current_company:   props.profile?.current_company   ?? '',
+  years_experience:  props.profile?.years_experience  ?? '',
+  cv_url:            props.profile?.cv_url            ?? '',
+  is_available:      props.profile?.is_available      ?? true,
+  availability_text: props.profile?.availability_text ?? 'Open to opportunities',
+  show_availability: props.profile?.show_availability ?? true,
 });
 
 const photoForm = useForm({ photo: null });
@@ -158,6 +161,28 @@ function getPhotoUrl(photo) {
             <label class="admin-label">CV / Resume URL</label>
             <input v-model="form.cv_url" type="url" placeholder="https://…" class="admin-input" :class="{'border-red-400': form.errors.cv_url}"/>
             <p v-if="form.errors.cv_url" class="admin-error">{{ form.errors.cv_url }}</p>
+          </div>
+
+          <!-- Availability badge -->
+          <div class="border border-border rounded-xl p-4 space-y-3 bg-muted/30">
+            <p class="text-sm font-semibold text-foreground">Availability Badge</p>
+            <div>
+              <label class="admin-label">Badge Text</label>
+              <input v-model="form.availability_text" type="text" maxlength="100"
+                placeholder="e.g. Open to opportunities" class="admin-input"/>
+              <p class="admin-hint">Shown as a small pill on your profile. Max 100 characters.</p>
+            </div>
+            <div class="flex flex-wrap gap-4">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input v-model="form.is_available" type="checkbox" class="w-4 h-4 rounded accent-green-500"/>
+                <span class="text-sm text-foreground">Green (available)</span>
+                <span class="text-xs text-muted-foreground">— uncheck for amber (busy)</span>
+              </label>
+            </div>
+            <div class="flex items-center gap-2">
+              <input v-model="form.show_availability" type="checkbox" id="show_availability" class="w-4 h-4 rounded accent-primary"/>
+              <label for="show_availability" class="text-sm text-foreground">Show badge on portfolio</label>
+            </div>
           </div>
 
           <div class="flex justify-end pt-2">

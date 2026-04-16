@@ -1,7 +1,8 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Link, useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+import Sortable from 'sortablejs';
 
 const props = defineProps({ list: Object });
 const isEditing = !!props.list;
@@ -30,6 +31,26 @@ function submit() {
     form.post(route('admin.lists.store'));
   }
 }
+
+// ── Drag-and-drop via sortablejs ──────────────────────────────────────────
+const itemsContainer = ref(null);
+let sortable = null;
+
+onMounted(() => {
+  if (itemsContainer.value) {
+    sortable = Sortable.create(itemsContainer.value, {
+      handle: '.drag-handle',
+      animation: 150,
+      ghostClass: 'opacity-30',
+      onEnd(evt) {
+        const moved = form.items.splice(evt.oldIndex, 1)[0];
+        form.items.splice(evt.newIndex, 0, moved);
+      },
+    });
+  }
+});
+
+onBeforeUnmount(() => { sortable?.destroy(); });
 </script>
 
 <template>
@@ -97,26 +118,30 @@ function submit() {
               No items yet — click "Add item" to start.
             </div>
 
-            <div class="space-y-2">
+            <div ref="itemsContainer" class="space-y-2">
               <div v-for="(item, i) in form.items" :key="i"
                 class="p-3 bg-muted/40 rounded-lg border border-border space-y-2"
                 :class="item.is_completed ? 'opacity-70' : ''">
-                <div class="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2">
-                  <div>
-                    <input v-model="item.text" type="text" placeholder="Item text *" required
-                      class="admin-input text-xs" :class="item.is_completed ? 'line-through text-muted-foreground' : ''"/>
+                <div class="grid grid-cols-[auto_1fr_1fr_auto] gap-2 items-center">
+                  <!-- Drag handle -->
+                  <div class="drag-handle cursor-grab active:cursor-grabbing text-muted-foreground/40 hover:text-muted-foreground transition-colors shrink-0">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
+                      <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
+                      <circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/>
+                    </svg>
                   </div>
-                  <div>
-                    <input v-model="item.url" type="url" placeholder="URL (optional)" class="admin-input text-xs"/>
-                  </div>
+                  <input v-model="item.text" type="text" placeholder="Item text *" required
+                    class="admin-input text-xs" :class="item.is_completed ? 'line-through text-muted-foreground' : ''"/>
+                  <input v-model="item.url" type="url" placeholder="URL (optional)" class="admin-input text-xs"/>
                   <button type="button" @click="removeItem(i)"
-                    class="self-center p-1.5 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors">
+                    class="self-center p-1.5 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors shrink-0">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                   </button>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 items-center">
+                <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 items-center pl-6">
                   <input v-model="item.note" type="text" placeholder="Note (optional)" class="admin-input text-xs"/>
                   <label class="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer whitespace-nowrap">
                     <input v-model="item.is_completed" type="checkbox" class="w-3.5 h-3.5 rounded accent-green-500"/>

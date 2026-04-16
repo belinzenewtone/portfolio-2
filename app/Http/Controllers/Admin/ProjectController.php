@@ -25,14 +25,15 @@ class ProjectController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name'        => 'required|string|max:255',
             'description' => 'nullable|string',
-            'date' => 'nullable|date',
+            'date'        => 'nullable|date',
             'project_url' => 'nullable|url|max:255',
-            'bg_color' => 'nullable|string|max:50',
-            'sort_order' => 'integer|min:0',
-            'is_visible' => 'boolean',
-            'logo' => 'nullable|image|max:1024',
+            'bg_color'    => 'nullable|string|max:50',
+            'sort_order'  => 'integer|min:0',
+            'is_visible'  => 'boolean',
+            'is_featured' => 'boolean',
+            'logo'        => 'nullable|image|max:1024',
         ]);
 
         if ($request->hasFile('logo')) {
@@ -52,14 +53,15 @@ class ProjectController extends Controller
     public function update(Request $request, Project $project)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name'        => 'required|string|max:255',
             'description' => 'nullable|string',
-            'date' => 'nullable|date',
+            'date'        => 'nullable|date',
             'project_url' => 'nullable|url|max:255',
-            'bg_color' => 'nullable|string|max:50',
-            'sort_order' => 'integer|min:0',
-            'is_visible' => 'boolean',
-            'logo' => 'nullable|image|max:1024',
+            'bg_color'    => 'nullable|string|max:50',
+            'sort_order'  => 'integer|min:0',
+            'is_visible'  => 'boolean',
+            'is_featured' => 'boolean',
+            'logo'        => 'nullable|image|max:1024',
         ]);
 
         if ($request->hasFile('logo')) {
@@ -80,6 +82,15 @@ class ProjectController extends Controller
             Storage::disk('public')->delete($project->logo_url);
         }
         $project->delete();
-        return back()->with('success', 'Project deleted.');
+        return redirect()->route('admin.projects.index')->with('success', 'Project deleted.');
+    }
+
+    public function reorder(\Illuminate\Http\Request $request)
+    {
+        $request->validate(['order' => 'required|array', 'order.*' => 'integer']);
+        foreach ($request->order as $position => $id) {
+            Project::where('id', $id)->update(['sort_order' => $position]);
+        }
+        return response()->json(['ok' => true]);
     }
 }

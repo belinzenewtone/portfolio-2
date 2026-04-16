@@ -20,18 +20,21 @@ class ProfileController extends Controller
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'title' => 'required|string|max:255',
-            'subtitle' => 'nullable|string|max:255',
-            'location' => 'nullable|string|max:255',
-            'bio' => 'nullable|string',
-            'email' => 'nullable|email|max:255',
-            'github_url' => 'nullable|url|max:255',
-            'linkedin_url' => 'nullable|url|max:255',
-            'twitter_url' => 'nullable|url|max:255',
-            'current_company' => 'nullable|string|max:255',
-            'years_experience' => 'nullable|string|max:50',
-            'cv_url' => 'nullable|url|max:255',
+            'name'              => 'required|string|max:255',
+            'title'             => 'required|string|max:255',
+            'subtitle'          => 'nullable|string|max:255',
+            'location'          => 'nullable|string|max:255',
+            'bio'               => 'nullable|string',
+            'email'             => 'nullable|email|max:255',
+            'github_url'        => 'nullable|url|max:255',
+            'linkedin_url'      => 'nullable|url|max:255',
+            'twitter_url'       => 'nullable|url|max:255',
+            'current_company'   => 'nullable|string|max:255',
+            'years_experience'  => 'nullable|string|max:50',
+            'cv_url'            => 'nullable|url|max:255',
+            'is_available'      => 'boolean',
+            'availability_text' => 'nullable|string|max:100',
+            'show_availability' => 'boolean',
         ]);
 
         $profile = Profile::first();

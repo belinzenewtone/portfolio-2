@@ -14,6 +14,7 @@ const form = useForm({
   bg_color:    props.project?.bg_color    ?? 'bg-blue-100',
   sort_order:  props.project?.sort_order  ?? 0,
   is_visible:  props.project?.is_visible  ?? true,
+  is_featured: props.project?.is_featured ?? false,
   logo:        null,
 });
 
@@ -123,10 +124,16 @@ function getLogoUrl(logo) {
             <p v-if="form.errors.logo" class="admin-error">{{ form.errors.logo }}</p>
           </div>
 
-          <!-- Visible -->
-          <div class="flex items-center gap-2">
-            <input v-model="form.is_visible" type="checkbox" id="is_visible" class="w-4 h-4 rounded accent-primary"/>
-            <label for="is_visible" class="text-sm text-foreground">Visible on portfolio</label>
+          <!-- Visible + Featured -->
+          <div class="flex flex-wrap gap-4">
+            <div class="flex items-center gap-2">
+              <input v-model="form.is_visible" type="checkbox" id="is_visible" class="w-4 h-4 rounded accent-primary"/>
+              <label for="is_visible" class="text-sm text-foreground">Visible on portfolio</label>
+            </div>
+            <div class="flex items-center gap-2">
+              <input v-model="form.is_featured" type="checkbox" id="is_featured" class="w-4 h-4 rounded accent-amber-500"/>
+              <label for="is_featured" class="text-sm text-foreground">⭐ Featured / Pinned</label>
+            </div>
           </div>
 
           <div class="flex justify-end gap-2 pt-2">

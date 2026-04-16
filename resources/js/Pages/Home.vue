@@ -1,9 +1,11 @@
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue';
+import { router, Head } from '@inertiajs/vue3';
 
 const props = defineProps({
   profile:        Object,
   projects:       Array,
+  skills:         Array,
   workExperiences:Array,
   educations:     Array,
   blogPosts:      Array,
@@ -65,6 +67,53 @@ const timelineByYear = computed(() => {
   return Object.entries(map).sort(([a], [b]) => b - a);
 });
 
+// ── Contact modal ──────────────────────────────────────────────────────────
+const contactOpen = ref(false);
+const contactForm = ref({ name: '', email: '', message: '' });
+const contactSending = ref(false);
+const contactSent = ref(false);
+const contactError = ref('');
+
+function openContact() { contactOpen.value = true; contactSent.value = false; contactError.value = ''; }
+function closeContact() { contactOpen.value = false; }
+
+async function submitContact() {
+  if (!contactForm.value.name || !contactForm.value.email || !contactForm.value.message) {
+    contactError.value = 'Please fill in all fields.';
+    return;
+  }
+  contactSending.value = true;
+  contactError.value = '';
+  router.post('/contact', contactForm.value, {
+    preserveScroll: true,
+    onSuccess: () => {
+      contactSent.value = true;
+      contactSending.value = false;
+      contactForm.value = { name: '', email: '', message: '' };
+    },
+    onError: () => {
+      contactError.value = 'Something went wrong. Please try again.';
+      contactSending.value = false;
+    },
+  });
+}
+
+// ── Skills grouped by category ─────────────────────────────────────────────
+const skillsByCategory = computed(() => {
+  const order = ['language', 'framework', 'cloud', 'database', 'tool', 'other'];
+  const map = {};
+  for (const s of props.skills ?? []) {
+    if (!map[s.category]) map[s.category] = [];
+    map[s.category].push(s);
+  }
+  return order.filter(k => map[k]).map(k => ({ category: k, items: map[k] }));
+});
+
+const catLabels = { language: 'Languages', framework: 'Frameworks', cloud: 'Cloud & DevOps', database: 'Databases', tool: 'Tools', other: 'Other' };
+
+// ── Featured projects ──────────────────────────────────────────────────────
+const featuredProjects = computed(() => (props.projects ?? []).filter(p => p.is_featured));
+
 // ── Helpers ────────────────────────────────────────────────────────────────
 function getPhotoUrl(p) { return p ? (p.startsWith('http') ? p : '/storage/' + p) : null; }
 function getLogoUrl(l)  { return l ? (l.startsWith('http') ? l : '/storage/' + l) : null; }
@@ -80,6 +129,16 @@ const catColor    = {
 </script>
 
 <template>
+  <Head>
+    <title>{{ profile?.name || 'Belinze Newtone' }} · {{ profile?.title || 'Software & Cloud Engineer' }}</title>
+    <meta name="description" :content="profile?.bio || (profile?.name || 'Belinze Newtone') + ' — ' + (profile?.title || 'Software & Cloud Engineer') + ' based in ' + (profile?.location || 'Nairobi, Kenya')"/>
+    <meta property="og:title" :content="(profile?.name || 'Belinze Newtone') + ' · Portfolio'"/>
+    <meta property="og:description" :content="profile?.bio || (profile?.title || 'Software & Cloud Engineer')"/>
+    <meta property="og:type" content="website"/>
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" :content="(profile?.name || 'Belinze Newtone') + ' · Portfolio'"/>
+    <meta name="twitter:description" :content="profile?.bio || (profile?.title || 'Software & Cloud Engineer')"/>
+  </Head>
   <div class="min-h-screen bg-background text-foreground">
     <div class="mx-auto max-w-2xl">
 
@@ -142,14 +201,14 @@ const catColor    = {
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                 </svg>
               </a>
-              <a v-if="profile?.email" :href="'mailto:' + profile.email"
+              <button @click="openContact"
                 class="social-pill !border-primary/50 !text-primary">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                 </svg>
                 Say hello
-              </a>
+              </button>
             </div>
           </div>
 
@@ -176,6 +235,18 @@ const catColor    = {
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- Availability badge -->
+        <div v-if="profile?.show_availability" class="mt-3 flex items-center gap-2">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border"
+            :class="profile.is_available
+              ? 'bg-green-500/10 text-green-600 border-green-500/30'
+              : 'bg-amber-500/10 text-amber-600 border-amber-500/30'">
+            <span class="w-1.5 h-1.5 rounded-full animate-pulse"
+              :class="profile.is_available ? 'bg-green-500' : 'bg-amber-500'"></span>
+            {{ profile.availability_text || (profile.is_available ? 'Open to opportunities' : 'Not available') }}
+          </span>
         </div>
 
         <!-- Bio -->
@@ -245,6 +316,61 @@ const catColor    = {
 
         <!-- PROJECTS -->
         <template v-if="activeTab === 'Projects'">
+
+          <!-- Tech Stack -->
+          <div v-if="skills?.length" class="section-card">
+            <h2 class="text-lg font-bold font-display text-foreground mb-0.5">Tech Stack</h2>
+            <p class="text-xs text-muted-foreground mb-4">Technologies I work with</p>
+            <div class="space-y-4">
+              <div v-for="group in skillsByCategory" :key="group.category">
+                <p class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{{ catLabels[group.category] || group.category }}</p>
+                <div class="flex flex-wrap gap-2">
+                  <div v-for="skill in group.items" :key="skill.id"
+                    class="flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium bg-muted/50 text-foreground border-border hover:border-primary/40 transition-colors">
+                    <img v-if="skill.icon_url" :src="skill.icon_url" :alt="skill.name" class="w-4 h-4 object-contain shrink-0"
+                      @error="e => e.target.style.display='none'"/>
+                    <span>{{ skill.name }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Featured projects -->
+          <div v-if="featuredProjects.length" class="section-card">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="text-lg">⭐</span>
+              <div>
+                <h2 class="text-lg font-bold font-display text-foreground leading-tight">Featured</h2>
+                <p class="text-xs text-muted-foreground">Highlights</p>
+              </div>
+            </div>
+            <div class="divide-y divide-border">
+              <div v-for="(project, i) in featuredProjects" :key="project.id">
+                <div class="flex items-start gap-3 py-3 first:pt-0">
+                  <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 overflow-hidden border border-border"
+                    :class="project.bg_color || 'bg-blue-50'">
+                    <img v-if="project.logo_url" :src="getLogoUrl(project.logo_url)" :alt="project.name" class="w-full h-full object-cover rounded-xl"/>
+                    <span v-else class="text-xs font-bold text-primary">{{ project.name.charAt(0) }}</span>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-start justify-between gap-2">
+                      <span class="text-sm font-semibold text-foreground">{{ project.name }}</span>
+                      <a v-if="project.project_url" :href="project.project_url" target="_blank" rel="noopener"
+                        class="shrink-0 text-xs text-primary hover:underline flex items-center gap-1">
+                        View
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                        </svg>
+                      </a>
+                    </div>
+                    <p class="text-xs text-muted-foreground mt-0.5 line-clamp-2">{{ project.description }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="section-card">
             <h2 class="text-lg font-bold font-display text-foreground mb-0.5">Software</h2>
             <p class="text-xs text-muted-foreground mb-4">Things I've built</p>
@@ -363,8 +489,8 @@ const catColor    = {
 
             <div v-else class="divide-y divide-border">
               <a v-for="post in blogPosts" :key="post.id"
-                :href="post.external_url || '#'"
-                :target="post.external_url ? '_blank' : ''"
+                :href="post.external_url || ('/blog/' + post.slug)"
+                :target="post.external_url ? '_blank' : '_self'"
                 rel="noopener"
                 class="flex items-start justify-between gap-3 py-4 group">
                 <div class="flex-1 min-w-0">
@@ -375,7 +501,7 @@ const catColor    = {
                 </div>
                 <div class="shrink-0 flex flex-col items-end gap-1 pt-0.5">
                   <span class="text-xs text-muted-foreground whitespace-nowrap">{{ post.published_at }}</span>
-                  <svg v-if="post.external_url" class="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors"
+                  <svg class="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors"
                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
@@ -589,6 +715,86 @@ const catColor    = {
         </template>
 
       </div>
+
+      <!-- ─── CONTACT MODAL ────────────────────────────────────────────── -->
+      <teleport to="body">
+        <transition
+          enter-active-class="transition duration-200 ease-out"
+          enter-from-class="opacity-0"
+          enter-to-class="opacity-100"
+          leave-active-class="transition duration-150 ease-in"
+          leave-from-class="opacity-100"
+          leave-to-class="opacity-0"
+        >
+          <div v-if="contactOpen"
+            class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 sm:p-6"
+            @click.self="closeContact">
+            <!-- Backdrop -->
+            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="closeContact"></div>
+            <!-- Modal -->
+            <div class="relative w-full max-w-md bg-card border border-border rounded-2xl shadow-2xl z-10
+                        max-h-[90vh] overflow-y-auto">
+              <!-- Header -->
+              <div class="flex items-center justify-between px-5 py-4 border-b border-border">
+                <div>
+                  <h3 class="text-base font-bold font-display text-foreground">Say hello 👋</h3>
+                  <p class="text-xs text-muted-foreground mt-0.5">I'll get back to you as soon as possible.</p>
+                </div>
+                <button @click="closeContact"
+                  class="w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Success state -->
+              <div v-if="contactSent" class="px-5 py-10 text-center">
+                <div class="text-4xl mb-3">✅</div>
+                <h4 class="text-sm font-semibold text-foreground mb-1">Message sent!</h4>
+                <p class="text-xs text-muted-foreground mb-4">Thanks for reaching out. I'll reply to <strong>{{ contactForm.email || 'you' }}</strong> soon.</p>
+                <button @click="closeContact" class="px-4 py-2 text-sm font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-all">
+                  Close
+                </button>
+              </div>
+
+              <!-- Form -->
+              <form v-else @submit.prevent="submitContact" class="px-5 py-4 space-y-4">
+                <div>
+                  <label class="block text-xs font-semibold text-muted-foreground mb-1">Name *</label>
+                  <input v-model="contactForm.name" type="text" required placeholder="Your name"
+                    class="w-full px-3 py-2.5 rounded-xl border border-border bg-muted/40 text-sm text-foreground
+                           placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"/>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-muted-foreground mb-1">Email *</label>
+                  <input v-model="contactForm.email" type="email" required placeholder="your@email.com"
+                    class="w-full px-3 py-2.5 rounded-xl border border-border bg-muted/40 text-sm text-foreground
+                           placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"/>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-muted-foreground mb-1">Message *</label>
+                  <textarea v-model="contactForm.message" required rows="4" placeholder="What's on your mind?"
+                    class="w-full px-3 py-2.5 rounded-xl border border-border bg-muted/40 text-sm text-foreground
+                           placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all resize-none"></textarea>
+                </div>
+                <p v-if="contactError" class="text-xs text-red-500">{{ contactError }}</p>
+                <div class="flex gap-2 pt-1">
+                  <button type="button" @click="closeContact"
+                    class="flex-1 px-4 py-2.5 text-sm font-semibold rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-all">
+                    Cancel
+                  </button>
+                  <button type="submit" :disabled="contactSending"
+                    class="flex-1 px-4 py-2.5 text-sm font-semibold rounded-xl bg-primary text-primary-foreground
+                           disabled:opacity-60 hover:bg-primary/90 transition-all">
+                    {{ contactSending ? 'Sending…' : 'Send message' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </transition>
+      </teleport>
 
       <!-- ─── FOOTER ─────────────────────────────────────────────────────── -->
       <footer class="px-4 py-8 border-t border-border text-center">

@@ -8,6 +8,7 @@ use App\Models\Education;
 use App\Models\Profile;
 use App\Models\Project;
 use App\Models\ReadingItem;
+use App\Models\Skill;
 use App\Models\TimelineEvent;
 use App\Models\WorkExperience;
 use Inertia\Inertia;
@@ -21,9 +22,10 @@ class HomeController extends Controller
         $workExperiences = WorkExperience::ordered()->get();
         $educations      = Education::ordered()->get();
         $blogPosts       = BlogPost::published()->get();
-        $lists           = BlogList::ordered()->published()->with('items')->get();
+        $lists           = BlogList::ordered()->published()->with(['items' => fn($q) => $q->orderBy('sort_order')])->get();
         $readingItems    = ReadingItem::ordered()->get();
         $timelineEvents  = TimelineEvent::ordered()->get();
+        $skills          = Skill::ordered()->visible()->get();
 
         return Inertia::render('Home', [
             'profile' => $profile,
@@ -36,6 +38,15 @@ class HomeController extends Controller
                 'logo_url'    => $p->logo_url,
                 'project_url' => $p->project_url,
                 'bg_color'    => $p->bg_color,
+                'is_featured' => $p->is_featured,
+            ]),
+
+            'skills' => $skills->map(fn($s) => [
+                'id'       => $s->id,
+                'name'     => $s->name,
+                'category' => $s->category,
+                'icon_url' => $s->icon_url,
+                'color'    => $s->color,
             ]),
 
             'workExperiences' => $workExperiences->map(fn($w) => [
@@ -63,6 +74,7 @@ class HomeController extends Controller
             'blogPosts' => $blogPosts->map(fn($b) => [
                 'id'              => $b->id,
                 'title'           => $b->title,
+                'slug'            => $b->slug,
                 'excerpt'         => $b->excerpt,
                 'external_url'    => $b->external_url,
                 'cover_image_url' => $b->cover_image_url,
@@ -75,10 +87,11 @@ class HomeController extends Controller
                 'description' => $l->description,
                 'emoji'       => $l->emoji,
                 'items'       => $l->items->map(fn($i) => [
-                    'id'   => $i->id,
-                    'text' => $i->text,
-                    'url'  => $i->url,
-                    'note' => $i->note,
+                    'id'           => $i->id,
+                    'text'         => $i->text,
+                    'url'          => $i->url,
+                    'note'         => $i->note,
+                    'is_completed' => $i->is_completed,
                 ]),
             ]),
 

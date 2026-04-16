@@ -20,5 +20,13 @@ class Profile extends Model
         'current_company',
         'years_experience',
         'cv_url',
+        'is_available',
+        'availability_text',
+        'show_availability',
+    ];
+
+    protected $casts = [
+        'is_available'      => 'boolean',
+        'show_availability' => 'boolean',
     ];
 }

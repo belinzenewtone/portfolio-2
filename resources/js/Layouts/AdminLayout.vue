@@ -2,9 +2,10 @@
 import { Link, usePage, router } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 
-const page  = usePage();
-const flash = computed(() => page.props.flash || {});
-const sidebarOpen = ref(false);
+const page           = usePage();
+const flash          = computed(() => page.props.flash || {});
+const unreadMessages = computed(() => page.props.unreadMessages || 0);
+const sidebarOpen    = ref(false);
 
 // ── Toast system ──────────────────────────────────────────────────────────
 const toast = ref(null);   // { type: 'success'|'error'|'info', message }
@@ -55,12 +56,19 @@ const navGroups = [
     label: 'Content',
     links: [
       { name: 'Projects',    href: route('admin.projects.index'),         icon: 'folder' },
+      { name: 'Skills',      href: route('admin.skills.index'),           icon: 'star' },
       { name: 'Work',        href: route('admin.work-experiences.index'), icon: 'briefcase' },
       { name: 'Education',   href: route('admin.educations.index'),       icon: 'graduation' },
       { name: 'Blog',        href: route('admin.blog.index'),             icon: 'pencil' },
       { name: 'Lists',       href: route('admin.lists.index'),            icon: 'list' },
       { name: 'Reading',     href: route('admin.reading.index'),          icon: 'book' },
       { name: 'Timeline',    href: route('admin.timeline.index'),         icon: 'clock' },
+    ],
+  },
+  {
+    label: 'Inbox',
+    links: [
+      { name: 'Messages',    href: route('admin.messages.index'),         icon: 'mail' },
     ],
   },
 ];
@@ -150,7 +158,17 @@ function isActive(href) {
                 <circle cx="12" cy="12" r="9" stroke-width="2"/>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 7v5l3 3"/>
               </svg>
-              <span>{{ link.name }}</span>
+              <svg v-else-if="link.icon === 'star'" class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+              </svg>
+              <svg v-else-if="link.icon === 'mail'" class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+              <span class="flex-1">{{ link.name }}</span>
+              <span v-if="link.icon === 'mail' && unreadMessages > 0"
+                class="ml-auto text-[10px] font-bold bg-red-500 text-white rounded-full px-1.5 py-0.5 leading-none">
+                {{ unreadMessages }}
+              </span>
             </Link>
           </div>
         </div>

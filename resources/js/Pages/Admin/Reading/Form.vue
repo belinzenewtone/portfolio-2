@@ -1,25 +1,39 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Link, useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 const props = defineProps({ item: Object });
 const isEditing = !!props.item;
 
 const form = useForm({
-  title:      props.item?.title      ?? '',
-  author:     props.item?.author     ?? '',
-  cover_url:  props.item?.cover_url  ?? '',
-  status:     props.item?.status     ?? 'want_to_read',
-  year_read:  props.item?.year_read  ?? '',
-  rating:     props.item?.rating     ?? '',
-  notes:      props.item?.notes      ?? '',
-  buy_url:    props.item?.buy_url    ?? '',
-  sort_order: props.item?.sort_order ?? 0,
+  title:        props.item?.title      ?? '',
+  author:       props.item?.author     ?? '',
+  cover_url:    props.item?.cover_url  ?? '',
+  cover_image:  null,
+  status:       props.item?.status     ?? 'want_to_read',
+  year_read:    props.item?.year_read  ?? '',
+  rating:       props.item?.rating     ?? '',
+  notes:        props.item?.notes      ?? '',
+  buy_url:      props.item?.buy_url    ?? '',
+  sort_order:   props.item?.sort_order ?? 0,
 });
+
+const coverPreview = ref(props.item?.cover_url || null);
+
+function onCoverChange(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  form.cover_image = file;
+  form.cover_url = ''; // clear URL field when uploading a file
+  const reader = new FileReader();
+  reader.onload = ev => { coverPreview.value = ev.target.result; };
+  reader.readAsDataURL(file);
+}
 
 function submit() {
   if (isEditing) {
-    form.put(route('admin.reading.update', props.item.id));
+    form.post(route('admin.reading.update', props.item.id), { method: 'put' });
   } else {
     form.post(route('admin.reading.store'));
   }
@@ -67,10 +81,30 @@ function submit() {
             </div>
           </div>
 
+          <!-- Cover image: upload or URL -->
           <div>
-            <label class="admin-label">Cover Image URL</label>
-            <input v-model="form.cover_url" type="url" placeholder="https://…" class="admin-input" :class="{'border-red-400': form.errors.cover_url}"/>
-            <p v-if="form.errors.cover_url" class="admin-error">{{ form.errors.cover_url }}</p>
+            <label class="admin-label">Cover Image</label>
+            <div class="flex items-start gap-3">
+              <!-- Preview -->
+              <div class="w-14 h-20 rounded-lg overflow-hidden shrink-0 border border-border bg-muted flex items-center justify-center">
+                <img v-if="coverPreview" :src="coverPreview" alt="Cover" class="w-full h-full object-cover"/>
+                <span v-else class="text-2xl text-muted-foreground">📖</span>
+              </div>
+              <div class="flex-1 space-y-2">
+                <div>
+                  <label class="text-xs text-muted-foreground mb-1 block">Upload file</label>
+                  <input type="file" accept="image/*" @change="onCoverChange"
+                    class="text-xs text-muted-foreground file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
+                </div>
+                <div>
+                  <label class="text-xs text-muted-foreground mb-1 block">Or paste URL</label>
+                  <input v-model="form.cover_url" type="url" placeholder="https://…" class="admin-input text-xs"
+                    @input="coverPreview = form.cover_url || null"
+                    :class="{'border-red-400': form.errors.cover_url}"/>
+                </div>
+              </div>
+            </div>
+            <p v-if="form.errors.cover_url" class="admin-error mt-1">{{ form.errors.cover_url }}</p>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
