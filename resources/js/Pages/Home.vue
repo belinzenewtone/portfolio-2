@@ -31,7 +31,7 @@ const activeTab = ref('Home');
 function setTab(tab) {
   if (tab === 'CV') {
     if (props.profile?.cv_url) window.open(props.profile.cv_url, '_blank');
-    return;
+    return; // no-op if no CV uploaded yet
   }
   activeTab.value = tab;
   // Scroll active tab into view on mobile
@@ -265,15 +265,22 @@ const catColor    = {
               :key="tab"
               :data-tab="tab"
               @click="setTab(tab)"
-              class="flex items-center py-3 px-2 text-sm font-medium
-                     whitespace-nowrap transition-colors outline-none"
-              :class="activeTab === tab && tab !== 'CV'
-                ? 'text-foreground'
-                : 'text-muted-foreground hover:text-foreground'"
+              :title="tab === 'CV' && !profile?.cv_url ? 'No CV uploaded yet' : undefined"
+              class="flex items-center py-3 px-2 text-sm font-medium whitespace-nowrap transition-colors outline-none"
+              :class="[
+                tab === 'CV' && !profile?.cv_url
+                  ? 'opacity-40 cursor-default'
+                  : activeTab === tab
+                    ? 'text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+              ]"
             >
-              <span class="px-2 py-0.5 rounded-md transition-colors"
+              <span class="px-2 py-0.5 rounded-md transition-colors flex items-center gap-1"
                 :class="activeTab === tab && tab !== 'CV' ? 'bg-primary text-white' : ''">
                 {{ tab }}
+                <svg v-if="tab === 'CV' && profile?.cv_url" class="w-3 h-3 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+                </svg>
               </span>
             </button>
           </div>

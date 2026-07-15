@@ -1,10 +1,17 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { useForm, usePage } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
+
+const CLOUD_NAME     = 'd718lc3o';
+const UPLOAD_PRESET  = 'porfolio';
 
 const props = defineProps({ profile: Object });
+const page  = usePage();
 
+const flash = computed(() => page.props.flash);
+
+// ── Main profile form ──────────────────────────────────────────────────────
 const form = useForm({
   name:              props.profile?.name              ?? '',
   title:             props.profile?.title             ?? '',
@@ -21,29 +28,106 @@ const form = useForm({
   is_available:      props.profile?.is_available      ?? true,
   availability_text: props.profile?.availability_text ?? 'Open to opportunities',
   show_availability: props.profile?.show_availability ?? true,
-  footer_email:      props.profile?.footer_email      ?? 'newtonebelinzeojing@gmail.com',
-  footer_name:       props.profile?.footer_name       ?? 'Belinze Newtone',
+  footer_email:      props.profile?.footer_email      ?? '',
+  footer_name:       props.profile?.footer_name       ?? '',
 });
-
-const photoForm = useForm({ photo: null });
-const photoPreview = ref(null);
 
 function submit() { form.put(route('admin.profile.update')); }
 
-function onPhotoChange(e) {
+// ── Photo upload (direct → Cloudinary → save URL) ─────────────────────────
+const photoPreview    = ref(props.profile?.profile_photo ?? null);
+const photoUploading  = ref(false);
+const photoError      = ref('');
+const photoForm       = useForm({ photo_url: '' });
+
+async function onPhotoChange(e) {
   const file = e.target.files[0];
   if (!file) return;
-  photoForm.photo = file;
+
+  // Instant local preview
   const reader = new FileReader();
   reader.onload = ev => { photoPreview.value = ev.target.result; };
   reader.readAsDataURL(file);
+
+  photoUploading.value = true;
+  photoError.value     = '';
+
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', UPLOAD_PRESET);
+
+    const res  = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message ?? 'Upload failed');
+
+    photoForm.photo_url = data.secure_url;
+    photoForm.post(route('admin.profile.photo'), {
+      preserveScroll: true,
+      onFinish: () => { photoUploading.value = false; },
+      onError:  () => { photoUploading.value = false; },
+    });
+  } catch (err) {
+    photoError.value    = err.message ?? 'Upload failed. Please try again.';
+    photoUploading.value = false;
+  }
 }
 
-function uploadPhoto() { photoForm.post(route('admin.profile.photo')); }
+function getPhotoUrl(p) {
+  if (!p) return null;
+  return p.startsWith('http') ? p : '/storage/' + p;
+}
 
-function getPhotoUrl(photo) {
-  if (!photo) return null;
-  return photo.startsWith('http') ? photo : '/storage/' + photo;
+// ── CV upload (direct → Cloudinary → save URL) ────────────────────────────
+const cvUploading = ref(false);
+const cvError     = ref('');
+const cvForm      = useForm({ cv_url: '' });
+const removeForm  = useForm({});
+
+const currentCvUrl  = ref(props.profile?.cv_url ?? '');
+const currentCvName = computed(() => {
+  if (!currentCvUrl.value) return '';
+  try {
+    const parts = new URL(currentCvUrl.value).pathname.split('/');
+    return decodeURIComponent(parts[parts.length - 1]);
+  } catch {
+    return 'CV uploaded';
+  }
+});
+
+async function onCvChange(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  cvUploading.value = true;
+  cvError.value     = '';
+
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', UPLOAD_PRESET);
+
+    const res  = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message ?? 'Upload failed');
+
+    cvForm.cv_url = data.secure_url;
+    cvForm.post(route('admin.profile.cv'), {
+      preserveScroll: true,
+      onSuccess: () => { currentCvUrl.value = data.secure_url; cvUploading.value = false; },
+      onError:   () => { cvUploading.value = false; },
+    });
+  } catch (err) {
+    cvError.value    = err.message ?? 'Upload failed. Please try again.';
+    cvUploading.value = false;
+  }
+}
+
+function removeCV() {
+  removeForm.delete(route('admin.profile.cv.remove'), {
+    preserveScroll: true,
+    onSuccess: () => { currentCvUrl.value = ''; form.cv_url = ''; },
+  });
 }
 </script>
 
@@ -56,30 +140,66 @@ function getPhotoUrl(photo) {
         <p class="text-sm mt-1 text-muted-foreground">Update your public portfolio profile.</p>
       </div>
 
-      <!-- ── Photo upload ── -->
+      <!-- ── Profile Photo ── -->
       <div class="section-card">
         <h3 class="text-sm font-semibold text-foreground mb-4">Profile Photo</h3>
         <div class="flex items-center gap-4">
           <div class="w-16 h-16 rounded-full overflow-hidden shrink-0 border-2 border-primary/30 flex items-center justify-center font-bold text-lg bg-primary/10 text-primary font-display">
-            <img v-if="photoPreview" :src="photoPreview" class="w-full h-full object-cover" alt="Preview"/>
-            <img v-else-if="profile?.profile_photo" :src="getPhotoUrl(profile.profile_photo)" class="w-full h-full object-cover" alt="Photo"/>
+            <img v-if="photoPreview" :src="getPhotoUrl(photoPreview) ?? photoPreview" class="w-full h-full object-cover" alt="Preview"/>
             <span v-else>{{ profile?.name?.charAt(0) || 'B' }}</span>
           </div>
           <div class="flex-1">
-            <form @submit.prevent="uploadPhoto" class="flex items-center gap-2 flex-wrap">
-              <input
-                type="file" accept="image/*" @change="onPhotoChange"
-                class="text-xs text-muted-foreground file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-all"
-              />
-              <button type="submit" :disabled="!photoForm.photo || photoForm.processing"
-                class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary text-primary-foreground disabled:opacity-50 hover:bg-primary/90 transition-all">
-                Upload
-              </button>
-            </form>
-            <p v-if="photoForm.errors.photo" class="text-xs text-red-500 mt-1">{{ photoForm.errors.photo }}</p>
-            <p class="text-xs mt-1 text-muted-foreground">JPG, PNG, GIF up to 2MB.</p>
+            <label class="inline-flex items-center gap-2 cursor-pointer">
+              <span class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-all">
+                {{ photoUploading ? 'Uploading…' : 'Choose photo' }}
+              </span>
+              <input type="file" accept="image/*" class="sr-only" :disabled="photoUploading" @change="onPhotoChange"/>
+            </label>
+            <p class="text-xs mt-1.5 text-muted-foreground">JPG, PNG, GIF up to 10 MB. Uploads directly to Cloudinary.</p>
+            <p v-if="photoError" class="text-xs text-red-500 mt-1">{{ photoError }}</p>
+            <p v-if="photoForm.errors.photo_url" class="text-xs text-red-500 mt-1">{{ photoForm.errors.photo_url }}</p>
           </div>
         </div>
+      </div>
+
+      <!-- ── CV / Resume Upload ── -->
+      <div class="section-card">
+        <h3 class="text-sm font-semibold text-foreground mb-1">CV / Resume</h3>
+        <p class="text-xs text-muted-foreground mb-4">Visitors click "CV" in your portfolio nav to download it.</p>
+
+        <!-- Current CV -->
+        <div v-if="currentCvUrl" class="flex items-center gap-3 mb-4 p-3 rounded-xl bg-green-500/10 border border-green-500/20">
+          <svg class="w-5 h-5 text-green-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-semibold text-green-700 dark:text-green-400">CV uploaded</p>
+            <a :href="currentCvUrl" target="_blank" class="text-xs text-green-600 hover:underline truncate block">{{ currentCvName }}</a>
+          </div>
+          <button type="button" @click="removeCV" :disabled="removeForm.processing"
+            class="text-xs text-red-500 hover:text-red-600 font-semibold shrink-0 disabled:opacity-50">
+            Remove
+          </button>
+        </div>
+
+        <!-- Upload area -->
+        <label class="block cursor-pointer">
+          <div class="border-2 border-dashed border-border hover:border-primary/50 rounded-xl p-6 text-center transition-colors"
+               :class="cvUploading ? 'opacity-60 pointer-events-none' : ''">
+            <svg class="w-8 h-8 mx-auto mb-2 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+            </svg>
+            <p class="text-sm font-semibold text-foreground">
+              {{ cvUploading ? 'Uploading to Cloudinary…' : currentCvUrl ? 'Replace CV' : 'Upload CV' }}
+            </p>
+            <p class="text-xs text-muted-foreground mt-1">PDF, DOC, DOCX up to 10 MB</p>
+          </div>
+          <input type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            class="sr-only" :disabled="cvUploading" @change="onCvChange"/>
+        </label>
+
+        <p v-if="cvError" class="text-xs text-red-500 mt-2">{{ cvError }}</p>
+        <p v-if="cvForm.errors.cv_url" class="text-xs text-red-500 mt-2">{{ cvForm.errors.cv_url }}</p>
       </div>
 
       <!-- ── Profile form ── -->
@@ -158,13 +278,6 @@ function getPhotoUrl(photo) {
             </div>
           </div>
 
-          <!-- CV URL -->
-          <div>
-            <label class="admin-label">CV / Resume URL</label>
-            <input v-model="form.cv_url" type="url" placeholder="https://…" class="admin-input" :class="{'border-red-400': form.errors.cv_url}"/>
-            <p v-if="form.errors.cv_url" class="admin-error">{{ form.errors.cv_url }}</p>
-          </div>
-
           <!-- Availability badge -->
           <div class="border border-border rounded-xl p-4 space-y-3 bg-muted/30">
             <p class="text-sm font-semibold text-foreground">Availability Badge</p>
@@ -193,15 +306,15 @@ function getPhotoUrl(photo) {
             <div>
               <label class="admin-label">Footer Email *</label>
               <input v-model="form.footer_email" type="email" required
-                placeholder="newtonebelinzeojing@gmail.com" class="admin-input"
+                placeholder="you@email.com" class="admin-input"
                 :class="{'border-red-400': form.errors.footer_email}"/>
               <p v-if="form.errors.footer_email" class="admin-error">{{ form.errors.footer_email }}</p>
-              <p class="admin-hint">Must be a valid email address (e.g. name@gmail.com). Shown as a clickable mailto link.</p>
+              <p class="admin-hint">Shown as a clickable mailto link in the footer.</p>
             </div>
             <div>
               <label class="admin-label">Copyright Name</label>
-              <input v-model="form.footer_name" type="text" placeholder="Belinze Newtone" class="admin-input"/>
-              <p class="admin-hint">Appears as "© {{ new Date().getFullYear() }} [name]". Year updates automatically.</p>
+              <input v-model="form.footer_name" type="text" placeholder="Your Name" class="admin-input"/>
+              <p class="admin-hint">Appears as "© {{ new Date().getFullYear() }} [name]".</p>
             </div>
           </div>
 

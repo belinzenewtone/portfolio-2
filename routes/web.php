@@ -34,7 +34,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Profile
         Route::get('/profile',       [ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profile',       [ProfileController::class, 'update'])->name('profile.update');
-        Route::post('/profile/photo',[ProfileController::class, 'uploadPhoto'])->name('profile.photo');
+        Route::post('/profile/photo', [ProfileController::class, 'uploadPhoto'])->name('profile.photo');
+        Route::post('/profile/cv',   [ProfileController::class, 'updateCv'])->name('profile.cv');
+        Route::delete('/profile/cv', [ProfileController::class, 'removeCv'])->name('profile.cv.remove');
 
         // Content sections
         Route::resource('projects',        ProjectController::class)->except(['show']);
