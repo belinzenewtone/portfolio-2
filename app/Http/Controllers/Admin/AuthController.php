@@ -62,7 +62,7 @@ class AuthController extends Controller
                 'admin_last_activity' => now()->timestamp,
             ]);
 
-            Log::channel('single')->info('Admin login successful', [
+            Log::info('Admin login successful', [
                 'ip'       => $request->ip(),
                 'username' => $request->username,
                 'time'     => now()->toDateTimeString(),
@@ -76,7 +76,7 @@ class AuthController extends Controller
         session(['admin_login_attempts' => $attempts]);
 
         // 6. Log failed attempt with IP + timestamp
-        Log::channel('single')->warning('Admin login failed', [
+        Log::warning('Admin login failed', [
             'ip'       => $request->ip(),
             'username' => $request->username,
             'attempt'  => $attempts,
@@ -89,7 +89,7 @@ class AuthController extends Controller
             session(['admin_lockout_until' => $lockoutUntil]);
             session()->forget('admin_login_attempts');
 
-            Log::channel('single')->warning('Admin account locked out', [
+            Log::warning('Admin account locked out', [
                 'ip'            => $request->ip(),
                 'username'      => $request->username,
                 'lockout_until' => now()->addMinutes(self::LOCKOUT_MINUTES)->toDateTimeString(),
