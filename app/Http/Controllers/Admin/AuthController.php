@@ -22,6 +22,16 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        try {
+            return $this->_login($request);
+        } catch (\Throwable $e) {
+            error_log('[AdminLogin] ' . get_class($e) . ': ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+            throw $e;
+        }
+    }
+
+    private function _login(Request $request)
+    {
         $request->validate([
             'username' => 'required|string',
             'password' => 'required|string',
