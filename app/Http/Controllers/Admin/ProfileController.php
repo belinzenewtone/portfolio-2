@@ -55,12 +55,13 @@ class ProfileController extends Controller
 
         $profile = Profile::first();
         if (!$profile) {
-            return back()->withErrors(['photo_url' => 'Profile not found.']);
+            return redirect()->route('admin.profile.edit')
+                ->withErrors(['photo_url' => 'Save your profile details first, then upload a photo.']);
         }
 
         $profile->update(['profile_photo' => $request->photo_url]);
 
-        return back()->with('success', 'Photo updated successfully.');
+        return redirect()->route('admin.profile.edit')->with('success', 'Photo updated successfully.');
     }
 
     // CV URL is set by the frontend after a direct Cloudinary upload
@@ -68,10 +69,15 @@ class ProfileController extends Controller
     {
         $request->validate(['cv_url' => 'required|url|max:500']);
 
-        $profile = Profile::firstOrCreate([]);
+        $profile = Profile::first();
+        if (!$profile) {
+            return redirect()->route('admin.profile.edit')
+                ->withErrors(['cv_url' => 'Save your profile details first, then upload your CV.']);
+        }
+
         $profile->update(['cv_url' => $request->cv_url]);
 
-        return back()->with('success', 'CV uploaded successfully.');
+        return redirect()->route('admin.profile.edit')->with('success', 'CV uploaded successfully.');
     }
 
     public function removeCv()
@@ -81,6 +87,6 @@ class ProfileController extends Controller
             $profile->update(['cv_url' => null]);
         }
 
-        return back()->with('success', 'CV removed.');
+        return redirect()->route('admin.profile.edit')->with('success', 'CV removed.');
     }
 }
