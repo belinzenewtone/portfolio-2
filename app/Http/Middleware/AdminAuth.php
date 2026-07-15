@@ -21,7 +21,7 @@ class AdminAuth
         $lastActivity = session('admin_last_activity');
 
         if ($lastActivity && (now()->timestamp - $lastActivity) > self::SESSION_TIMEOUT_SECONDS) {
-            Log::channel('single')->info('Admin session expired due to inactivity', [
+            Log::info('Admin session expired due to inactivity', [
                 'ip'   => $request->ip(),
                 'time' => now()->toDateTimeString(),
             ]);
